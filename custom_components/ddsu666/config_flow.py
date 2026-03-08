@@ -97,8 +97,13 @@ class Ddsu666ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return Ddsu666OptionsFlowHandler(config_entry)
 
 
-class Ddsu666OptionsFlowHandler(config_entries.OptionsFlowWithOptionsHandler):
+class Ddsu666OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle DDSU666 options (change host, port, slave, and optional register addresses)."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        super().__init__()
+        self.config_entry = config_entry
 
     async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
         """Manage the options."""
