@@ -17,12 +17,12 @@
       }
     },
     "error": {
-      "cannot_connect": "无法连接网关，请检查 IP、端口和从站地址。",
+      "cannot_connect": "连接失败：{reason}。请确认网关可从本机访问，且端口与从站 ID 正确。",
       "invalid_host": "请输入有效的主机（IP 地址）。",
       "already_configured": "该电表（主机:端口:从站）已配置。"
     },
     "errors": {
-      "cannot_connect": "无法连接网关，请检查 IP、端口和从站地址。",
+      "cannot_connect": "连接失败：{reason}。请确认网关可从本机访问，且端口与从站 ID 正确。",
       "invalid_host": "请输入有效的主机（IP 地址）。",
       "already_configured": "该电表（主机:端口:从站）已配置。"
     },
@@ -64,7 +64,7 @@
       }
     },
     "error": {
-      "cannot_connect": "连接失败，请检查 IP、端口和从站地址。",
+      "cannot_connect": "连接失败：{reason}。请确认网关可访问，且端口与从站 ID 正确。",
       "invalid_host": "请输入有效的主机（IP 地址）。",
       "already_configured": "该电表（主机:端口:从站）已配置。"
     }

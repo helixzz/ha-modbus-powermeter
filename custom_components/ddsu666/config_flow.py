@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import traceback
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -43,11 +45,17 @@ def _options_schema(data: dict) -> vol.Schema:
 
 async def _test_connection(hass: HomeAssistant, host: str, port: int, slave: int) -> str | None:
     """Test Modbus TCP connection. Returns None on success, error message on failure."""
+    logger = logging.getLogger(__name__)
     try:
-        await async_read_all(host=host, port=port, slave=slave, timeout=3.0)
+        await async_read_all(host=host, port=port, slave=slave, timeout=5.0)
         return None
     except Exception as e:
-        return str(e)
+        msg = str(e)
+        logger.warning(
+            "DDSU666 connection test failed (%s:%s slave=%s): %s\n%s",
+            host, port, slave, msg, traceback.format_exc(),
+        )
+        return msg
 
 
 def _entry_data(entry: config_entries.ConfigEntry) -> dict:
@@ -76,16 +84,21 @@ class Ddsu666ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 err = await _test_connection(self.hass, host, port, slave)
                 if err:
                     errors["base"] = "cannot_connect"
+                    self._connection_error_reason = err
                 else:
                     await self.async_set_unique_id(f"{host}:{port}:{slave}")
                     self._abort_if_unique_id_configured()
                     title = f"DDSU666 ({host}:{port} #{slave})"
                     return self.async_create_entry(title=title, data=user_input)
 
+        placeholders = {}
+        if errors.get("base") == "cannot_connect" and getattr(self, "_connection_error_reason", None):
+            placeholders["reason"] = self._connection_error_reason
         return self.async_show_form(
             step_id="user",
             data_schema=_schema(),
             errors=errors,
+            description_placeholders=placeholders if placeholders else None,
         )
 
     @staticmethod
@@ -120,6 +133,7 @@ class Ddsu666OptionsFlowHandler(config_entries.OptionsFlow):
                 err = await _test_connection(self.hass, host, port, slave)
                 if err:
                     errors["base"] = "cannot_connect"
+                    self._connection_error_reason = err
                 else:
                     unique_id = f"{host}:{port}:{slave}"
                     for entry in self.hass.config_entries.async_entries(DOMAIN):
@@ -131,8 +145,12 @@ class Ddsu666OptionsFlowHandler(config_entries.OptionsFlow):
                     else:
                         return self.async_create_entry(data=user_input)
 
+        placeholders = {}
+        if errors.get("base") == "cannot_connect" and getattr(self, "_connection_error_reason", None):
+            placeholders["reason"] = self._connection_error_reason
         return self.async_show_form(
             step_id="init",
             data_schema=_options_schema(data),
             errors=errors,
+            description_placeholders=placeholders if placeholders else None,
         )

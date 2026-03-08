@@ -40,15 +40,21 @@ async def async_read_all(
         port=port,
         timeout=timeout,
     ) as client:
-        if not client.connected:
-            raise ConnectionError("Modbus TCP connection failed")
-
+        # Connection may be established on first request in some pymodbus versions
         for start_address, count, scale, key in register_map:
-            rr = await client.read_holding_registers(
-                address=start_address,
-                count=count,
-                slave=slave,
-            )
+            # pymodbus 3.x uses unit=; older versions use slave=
+            try:
+                rr = await client.read_holding_registers(
+                    address=start_address,
+                    count=count,
+                    unit=slave,
+                )
+            except TypeError:
+                rr = await client.read_holding_registers(
+                    address=start_address,
+                    count=count,
+                    slave=slave,
+                )
             if rr.isError():
                 raise ModbusException(str(rr))
             if not rr.registers or len(rr.registers) < count:

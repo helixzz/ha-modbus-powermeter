@@ -17,12 +17,12 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect to the gateway. Check IP, port, and slave address.",
+      "cannot_connect": "Connection failed: {reason}. Check that the gateway is reachable from this host, and that the port and slave ID are correct.",
       "invalid_host": "Please enter a valid host (IP address).",
       "already_configured": "This meter (host:port:slave) is already configured."
     },
     "errors": {
-      "cannot_connect": "Failed to connect to the gateway. Check IP, port, and slave address.",
+      "cannot_connect": "Connection failed: {reason}. Check that the gateway is reachable from this host, and that the port and slave ID are correct.",
       "invalid_host": "Please enter a valid host (IP address).",
       "already_configured": "This meter (host:port:slave) is already configured."
     },
@@ -64,7 +64,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect. Check IP, port, and slave address.",
+      "cannot_connect": "Connection failed: {reason}. Check that the gateway is reachable and that the port and slave ID are correct.",
       "invalid_host": "Please enter a valid host (IP address).",
       "already_configured": "This meter (host:port:slave) is already configured."
     }
