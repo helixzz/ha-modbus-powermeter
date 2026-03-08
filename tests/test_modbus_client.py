@@ -53,56 +53,62 @@ def test_read_float_reverse_offset():
 
 
 @pytest.fixture(autouse=True)
-def reset_unit_keyword():
-    """Reset the cached unit keyword so each test sees a clean signature."""
-    modbus_client._unit_keyword = None
+def reset_unit_strategy():
+    """Reset the cached strategy so each test sees a clean signature."""
+    modbus_client._unit_strategy = None
     yield
-    modbus_client._unit_keyword = None
+    modbus_client._unit_strategy = None
 
 
 @pytest.mark.asyncio
 async def test_read_holding_registers_uses_unit_keyword():
     """Client with unit= in signature (pymodbus 3.x style)."""
-    async def read_holding_registers(address: int, count: int, *, unit: int = 1):
+    async def read_holding_registers(address: int, count: int = 1, *, unit: int = 1):
         assert address == 0x2000 and count == 2 and unit == 1
         return MagicMock(isError=lambda: False, registers=[0x4390, 0x8000])  # 288.0
 
     client = MagicMock()
+    client.params = None  # no params -> use keyword from signature
     client.read_holding_registers = read_holding_registers
     result = await _read_holding_registers(client, 0x2000, 2, 1)
     assert result.registers == [0x4390, 0x8000]
-    assert modbus_client._unit_keyword == "unit"
+    assert modbus_client._unit_strategy == "unit"
 
 
 @pytest.mark.asyncio
 async def test_read_holding_registers_uses_slave_keyword():
     """Client with slave= in signature (older pymodbus)."""
-    modbus_client._unit_keyword = None
+    modbus_client._unit_strategy = None
 
-    async def read_holding_registers(address: int, count: int, *, slave: int = 1):
+    async def read_holding_registers(address: int, count: int = 1, *, slave: int = 1):
         assert address == 0x2000 and count == 2 and slave == 2
         return MagicMock(isError=lambda: False, registers=[0, 0])
 
     client = MagicMock()
+    client.params = None
     client.read_holding_registers = read_holding_registers
     result = await _read_holding_registers(client, 0x2000, 2, 2)
-    assert modbus_client._unit_keyword == "slave"
+    assert modbus_client._unit_strategy == "slave"
 
 
 @pytest.mark.asyncio
-async def test_read_holding_registers_only_two_positional():
-    """Client that only accepts (address, count) - no unit param (uses default)."""
-    modbus_client._unit_keyword = None
+async def test_read_holding_registers_only_two_positional_uses_params():
+    """Client that only accepts (address, count); unit set via client.params.unit."""
+    modbus_client._unit_strategy = None
 
     async def read_holding_registers(address: int, count: int):
         assert address == 0x2000 and count == 2
+        assert getattr(client.params, "unit", None) == 1
         return MagicMock(isError=lambda: False, registers=[0x4390, 0x8000])
 
     client = MagicMock()
+    client.params = MagicMock()
+    client.params.unit = 0
     client.read_holding_registers = read_holding_registers
     result = await _read_holding_registers(client, 0x2000, 2, 1)
     assert result.registers == [0x4390, 0x8000]
-    assert modbus_client._unit_keyword is None
+    assert client.params.unit == 1
+    assert modbus_client._unit_strategy == "params"
 
 
 # --- async_read_all with mock (full flow) ---
@@ -141,7 +147,7 @@ async def test_async_read_all_mock_client():
             pass
 
     with patch("ddsu666.modbus_client.AsyncModbusTcpClient", return_value=FakeCtx()):
-        modbus_client._unit_keyword = None
+        modbus_client._unit_strategy = None
         result = await async_read_all("127.0.0.1", 9999, 1, timeout=1.0)
 
     assert result["u"] == pytest.approx(220.0, abs=0.01)
@@ -159,16 +165,16 @@ async def test_async_read_all_uses_inspect_for_keyword():
     """Ensure we only call read_holding_registers with (address, count) + one keyword."""
     seen_kwargs = []
 
-    async def capture_read(address: int, count: int, **kwargs):
+    async def capture_read(address: int, count: int = 1, **kwargs):
         seen_kwargs.append(kwargs)
-        # Return valid 2 registers for float
         return MagicMock(isError=lambda: False, registers=[0x4390, 0x8000])
 
     fake_client = MagicMock()
+    fake_client.params = None
     fake_client.read_holding_registers = capture_read
-    # Signature with unit= (keyword-only)
-    sig = inspect.signature(lambda address, count, *, unit=1: None)
-    fake_client.read_holding_registers.__signature__ = sig
+    def _sig_fn(address, *, count=1, device_id=1):
+        pass
+    fake_client.read_holding_registers.__signature__ = inspect.signature(_sig_fn)
 
     class FakeCtx:
         async def __aenter__(self):
@@ -177,7 +183,7 @@ async def test_async_read_all_uses_inspect_for_keyword():
             pass
 
     with patch("ddsu666.modbus_client.AsyncModbusTcpClient", return_value=FakeCtx()):
-        modbus_client._unit_keyword = None
+        modbus_client._unit_strategy = None
         # Only read one register set to avoid many calls
         from ddsu666.const import SENSOR_REGISTERS
         single_map = [SENSOR_REGISTERS[0]]
@@ -186,5 +192,5 @@ async def test_async_read_all_uses_inspect_for_keyword():
         )
 
     assert len(seen_kwargs) == 1
-    assert seen_kwargs[0] == {"unit": 5}
+    assert seen_kwargs[0]["device_id"] == 5
     assert "u" in result

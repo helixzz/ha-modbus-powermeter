@@ -11,22 +11,45 @@ from pymodbus.exceptions import ModbusException
 
 from .const import get_register_map_from_config, SENSOR_REGISTERS
 
-# Cache for the correct keyword to pass slave/unit (discovered once per process)
-_unit_keyword: str | None = None
+# Cache for the correct way to pass slave/unit (discovered once per process)
+# "keyword" = use that keyword name; "params" = set client.params.unit then call with 2 args only
+_unit_strategy: str | None = None
+
+
+def _apply_unit_to_client(client: Any, slave: int) -> None:
+    """Set default unit/slave on client when API only accepts (address, count)."""
+    params = getattr(client, "params", None)
+    if params is not None:
+        if hasattr(params, "unit"):
+            params.unit = slave
+        elif hasattr(params, "slave"):
+            params.slave = slave
 
 
 async def _read_holding_registers(client: Any, address: int, count: int, slave: int) -> Any:
-    """Call read_holding_registers with (address, count) + correct unit/slave keyword for this pymodbus version."""
-    global _unit_keyword
-    if _unit_keyword is None:
-        sig = inspect.signature(client.read_holding_registers)
-        for name in ("unit", "slave", "unit_id", "slave_id", "device_id"):
-            if name in sig.parameters:
-                _unit_keyword = name
-                break
-    if _unit_keyword:
-        return await client.read_holding_registers(address, count, **{_unit_keyword: slave})
-    return await client.read_holding_registers(address, count)
+    """Call read_holding_registers; adapt to pymodbus versions (params first, then keyword)."""
+    global _unit_strategy
+    if _unit_strategy is None:
+        # Prefer client.params.unit when present (many pymodbus versions only accept 2 args)
+        params = getattr(client, "params", None)
+        if params is not None and (hasattr(params, "unit") or hasattr(params, "slave")):
+            _unit_strategy = "params"
+        else:
+            sig = inspect.signature(client.read_holding_registers)
+            # Prefer device_id (pymodbus 3.6+); then unit/slave
+            for name in ("device_id", "unit", "slave", "unit_id", "slave_id"):
+                if name in sig.parameters:
+                    _unit_strategy = name
+                    break
+            else:
+                _unit_strategy = "params"
+    if _unit_strategy == "params":
+        _apply_unit_to_client(client, slave)
+        return await client.read_holding_registers(address, count=count)
+    # pymodbus 3.6+: (address, *, count=1, device_id=1) - only address positional
+    return await client.read_holding_registers(
+        address, count=count, **{_unit_strategy: slave}
+    )
 
 
 def _read_float_reverse(registers: list[int], offset: int = 0) -> float:

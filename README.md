@@ -90,14 +90,15 @@ In the Energy dashboard, add a **consumption** (or similar) and choose the **Tot
 
 ## Development and testing
 
-Unit tests run locally (no Home Assistant required) to check Modbus parsing and pymodbus API compatibility:
+Unit tests run locally (no Home Assistant required):
 
 ```bash
 pip install -r requirements-dev.txt
 pytest tests -v
 ```
 
-Tests cover: float register parsing (`_read_float_reverse`), config/register map (`const`), and the `read_holding_registers` wrapper that adapts to different pymodbus parameter names (`unit` / `slave` / two-arg only). The full `async_read_all` flow is tested with a mock client (no real device).
+- **Mock tests**: float parsing (`_read_float_reverse`), config/register map (`const`), and the `read_holding_registers` wrapper that adapts to different pymodbus APIs (`device_id` / `unit` / `slave` / `client.params.unit`). The full `async_read_all` flow is tested with a mock client.
+- **Real device test** (optional): if the meter is reachable (e.g. at `172.16.33.254:9999`), run `pytest tests/test_real_meter.py -v -s` to hit the real meter. Set `DDSU666_HOST`, `DDSU666_PORT`, `DDSU666_SLAVE` to override; set `DDSU666_SKIP=1` to skip this test.
 
 ## License
 
