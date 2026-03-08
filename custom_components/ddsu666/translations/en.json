@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure DDSU666 power meter",
+        "description": "Enter the Modbus TCP gateway address and meter slave ID.",
+        "data": {
+          "host": "Host (IP address)",
+          "port": "Port",
+          "slave": "Modbus slave address"
+        },
+        "data_description": {
+          "host": "IP address of the Modbus TCP gateway (e.g. 172.16.33.254)",
+          "port": "TCP port (e.g. 9999 or 502)",
+          "slave": "Slave/unit ID of the meter on the bus (default 1)"
+        }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the gateway. Check IP, port, and slave address.",
+      "invalid_host": "Please enter a valid host (IP address).",
+      "already_configured": "This meter (host:port:slave) is already configured."
+    },
+    "errors": {
+      "cannot_connect": "Failed to connect to the gateway. Check IP, port, and slave address.",
+      "invalid_host": "Please enter a valid host (IP address).",
+      "already_configured": "This meter (host:port:slave) is already configured."
+    },
+    "abort": {
+      "already_configured": "This meter is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure DDSU666 connection",
+        "description": "Change the Modbus TCP gateway, slave address, or register addresses (for different meter variants).",
+        "data": {
+          "host": "Host (IP address)",
+          "port": "Port",
+          "slave": "Modbus slave address",
+          "reg_u": "Voltage register (decimal)",
+          "reg_i": "Current register (decimal)",
+          "reg_p": "Active power register (decimal)",
+          "reg_q": "Reactive power register (decimal)",
+          "reg_s": "Apparent power register (decimal)",
+          "reg_pf": "Power factor register (decimal)",
+          "reg_freq": "Frequency register (decimal)",
+          "reg_impep": "Total energy register (decimal)"
+        },
+        "data_description": {
+          "host": "IP address of the Modbus TCP gateway",
+          "port": "TCP port",
+          "slave": "Slave/unit ID of the meter",
+          "reg_u": "Modbus start address for voltage (e.g. 8192 for 0x2000). Leave default if unsure.",
+          "reg_i": "Modbus start address for current (e.g. 8194 for 0x2002).",
+          "reg_p": "Modbus start address for active power (e.g. 8196 for 0x2004).",
+          "reg_q": "Modbus start address for reactive power (e.g. 8198 for 0x2006).",
+          "reg_s": "Modbus start address for apparent power (e.g. 8200 for 0x2008).",
+          "reg_pf": "Modbus start address for power factor (e.g. 8202 for 0x200A).",
+          "reg_freq": "Modbus start address for frequency (e.g. 8206 for 0x200E).",
+          "reg_impep": "Modbus start address for total active energy (e.g. 16384 for 0x4000)."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect. Check IP, port, and slave address.",
+      "invalid_host": "Please enter a valid host (IP address).",
+      "already_configured": "This meter (host:port:slave) is already configured."
+    }
+  }
+}

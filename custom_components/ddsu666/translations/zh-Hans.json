@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "配置 DDSU666 电能表",
+        "description": "请输入 Modbus TCP 网关地址与电表从站地址。",
+        "data": {
+          "host": "主机（IP 地址）",
+          "port": "端口",
+          "slave": "Modbus 从站地址"
+        },
+        "data_description": {
+          "host": "Modbus TCP 网关的 IP 地址（例如 172.16.33.254）",
+          "port": "TCP 端口（例如 9999 或 502）",
+          "slave": "电表在总线上的从站/单元 ID（默认 1）"
+        }
+    },
+    "error": {
+      "cannot_connect": "无法连接网关，请检查 IP、端口和从站地址。",
+      "invalid_host": "请输入有效的主机（IP 地址）。",
+      "already_configured": "该电表（主机:端口:从站）已配置。"
+    },
+    "errors": {
+      "cannot_connect": "无法连接网关，请检查 IP、端口和从站地址。",
+      "invalid_host": "请输入有效的主机（IP 地址）。",
+      "already_configured": "该电表（主机:端口:从站）已配置。"
+    },
+    "abort": {
+      "already_configured": "该电表已配置。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "配置 DDSU666 连接",
+        "description": "修改 Modbus TCP 网关、从站地址或寄存器地址（适用于不同型号/固件）。",
+        "data": {
+          "host": "主机（IP 地址）",
+          "port": "端口",
+          "slave": "Modbus 从站地址",
+          "reg_u": "电压寄存器（十进制）",
+          "reg_i": "电流寄存器（十进制）",
+          "reg_p": "有功功率寄存器（十进制）",
+          "reg_q": "无功功率寄存器（十进制）",
+          "reg_s": "视在功率寄存器（十进制）",
+          "reg_pf": "功率因数寄存器（十进制）",
+          "reg_freq": "频率寄存器（十进制）",
+          "reg_impep": "总电能寄存器（十进制）"
+        },
+        "data_description": {
+          "host": "Modbus TCP 网关的 IP 地址",
+          "port": "TCP 端口",
+          "slave": "电表从站/单元 ID",
+          "reg_u": "电压的 Modbus 起始地址（如 8192 即 0x2000）。不确定时保持默认。",
+          "reg_i": "电流的 Modbus 起始地址（如 8194 即 0x2002）。",
+          "reg_p": "有功功率的 Modbus 起始地址（如 8196 即 0x2004）。",
+          "reg_q": "无功功率的 Modbus 起始地址（如 8198 即 0x2006）。",
+          "reg_s": "视在功率的 Modbus 起始地址（如 8200 即 0x2008）。",
+          "reg_pf": "功率因数的 Modbus 起始地址（如 8202 即 0x200A）。",
+          "reg_freq": "频率的 Modbus 起始地址（如 8206 即 0x200E）。",
+          "reg_impep": "总有功电能的 Modbus 起始地址（如 16384 即 0x4000）。"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "连接失败，请检查 IP、端口和从站地址。",
+      "invalid_host": "请输入有效的主机（IP 地址）。",
+      "already_configured": "该电表（主机:端口:从站）已配置。"
+    }
+  }
+}
