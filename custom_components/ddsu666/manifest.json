@@ -3,9 +3,9 @@
   "name": "DDSU666 Power Meter",
   "codeowners": ["@helix"],
   "config_flow": true,
-  "documentation": "https://github.com/helix/ha-modbus-powermeter",
+  "documentation": "https://github.com/helixzz/ha-modbus-powermeter",
   "integration_type": "device",
-  "issue_tracker": "https://github.com/helix/ha-modbus-powermeter/issues",
+  "issue_tracker": "https://github.com/helixzz/ha-modbus-powermeter/issues",
   "requirements": ["pymodbus>=3.0.0"],
   "version": "1.0.0"
 }
