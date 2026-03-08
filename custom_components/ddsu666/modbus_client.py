@@ -42,19 +42,18 @@ async def async_read_all(
     ) as client:
         # Connection may be established on first request in some pymodbus versions
         for start_address, count, scale, key in register_map:
-            # pymodbus 3.x uses unit=; older versions use slave=
+            # pymodbus version compatibility: try positional, then unit=, then device_id=
             try:
-                rr = await client.read_holding_registers(
-                    address=start_address,
-                    count=count,
-                    unit=slave,
-                )
+                rr = await client.read_holding_registers(start_address, count, slave)
             except TypeError:
-                rr = await client.read_holding_registers(
-                    address=start_address,
-                    count=count,
-                    slave=slave,
-                )
+                try:
+                    rr = await client.read_holding_registers(
+                        start_address, count, unit=slave
+                    )
+                except TypeError:
+                    rr = await client.read_holding_registers(
+                        start_address, count, device_id=slave
+                    )
             if rr.isError():
                 raise ModbusException(str(rr))
             if not rr.registers or len(rr.registers) < count:
