@@ -8,14 +8,23 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    UnitOfElectricCurrent,
-    UnitOfEnergy,
-    UnitOfFrequency,
-    UnitOfPower,
-    UnitOfVoltage,
-)
 from homeassistant.core import HomeAssistant
+
+# UnitOf* enums: voltage is UnitOfElectricPotential (not UnitOfVoltage) in HA
+try:
+    from homeassistant.const import (
+        UnitOfElectricCurrent,
+        UnitOfElectricPotential,
+        UnitOfEnergy,
+        UnitOfFrequency,
+        UnitOfPower,
+    )
+except ImportError:
+    UnitOfElectricPotential = type("UnitOfElectricPotential", (), {"VOLT": "V"})
+    UnitOfElectricCurrent = type("UnitOfElectricCurrent", (), {"AMPERE": "A"})
+    UnitOfPower = type("UnitOfPower", (), {"WATT": "W"})
+    UnitOfEnergy = type("UnitOfEnergy", (), {"KILO_WATT_HOUR": "kWh"})
+    UnitOfFrequency = type("UnitOfFrequency", (), {"HERTZ": "Hz"})
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -28,7 +37,7 @@ SENSOR_DEF = {
         "Voltage",
         SensorDeviceClass.VOLTAGE,
         SensorStateClass.MEASUREMENT,
-        UnitOfVoltage.VOLT,
+        UnitOfElectricPotential.VOLT,
         1,
     ),
     "i": (
