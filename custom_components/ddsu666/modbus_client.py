@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import struct
 from typing import Any
 
@@ -9,6 +10,23 @@ from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
 from .const import get_register_map_from_config, SENSOR_REGISTERS
+
+# Cache for the correct keyword to pass slave/unit (discovered once per process)
+_unit_keyword: str | None = None
+
+
+async def _read_holding_registers(client: Any, address: int, count: int, slave: int) -> Any:
+    """Call read_holding_registers with (address, count) + correct unit/slave keyword for this pymodbus version."""
+    global _unit_keyword
+    if _unit_keyword is None:
+        sig = inspect.signature(client.read_holding_registers)
+        for name in ("unit", "slave", "unit_id", "slave_id", "device_id"):
+            if name in sig.parameters:
+                _unit_keyword = name
+                break
+    if _unit_keyword:
+        return await client.read_holding_registers(address, count, **{_unit_keyword: slave})
+    return await client.read_holding_registers(address, count)
 
 
 def _read_float_reverse(registers: list[int], offset: int = 0) -> float:
@@ -41,19 +59,9 @@ async def async_read_all(
         timeout=timeout,
     ) as client:
         # Connection may be established on first request in some pymodbus versions
+        # API takes only (address, count); unit/slave via keyword (name varies by version)
         for start_address, count, scale, key in register_map:
-            # pymodbus version compatibility: try positional, then unit=, then device_id=
-            try:
-                rr = await client.read_holding_registers(start_address, count, slave)
-            except TypeError:
-                try:
-                    rr = await client.read_holding_registers(
-                        start_address, count, unit=slave
-                    )
-                except TypeError:
-                    rr = await client.read_holding_registers(
-                        start_address, count, device_id=slave
-                    )
+            rr = await _read_holding_registers(client, start_address, count, slave)
             if rr.isError():
                 raise ModbusException(str(rr))
             if not rr.registers or len(rr.registers) < count:

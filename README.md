@@ -88,6 +88,17 @@ In the Energy dashboard, add a **consumption** (or similar) and choose the **Tot
 - **Model**: 正泰 DDSU666 (CHNT DDSU666) single-phase power meter
 - **Communication**: Modbus RTU over RS485, exposed via a Modbus TCP gateway (e.g. RS485‑to‑TCP converter) on your network
 
+## Development and testing
+
+Unit tests run locally (no Home Assistant required) to check Modbus parsing and pymodbus API compatibility:
+
+```bash
+pip install -r requirements-dev.txt
+pytest tests -v
+```
+
+Tests cover: float register parsing (`_read_float_reverse`), config/register map (`const`), and the `read_holding_registers` wrapper that adapts to different pymodbus parameter names (`unit` / `slave` / two-arg only). The full `async_read_all` flow is tested with a mock client (no real device).
+
 ## License
 
 See [LICENSE](LICENSE) in the repository root.
