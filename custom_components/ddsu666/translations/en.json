@@ -14,6 +14,7 @@
           "port": "TCP port (e.g. 9999 or 502)",
           "slave": "Slave/unit ID of the meter on the bus (default 1)"
         }
+      }
     },
     "error": {
       "cannot_connect": "Failed to connect to the gateway. Check IP, port, and slave address.",
