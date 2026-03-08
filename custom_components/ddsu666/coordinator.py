@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
 
 from homeassistant.config_entries import ConfigEntry
@@ -31,7 +32,7 @@ class Ddsu666DataUpdateCoordinator(DataUpdateCoordinator[dict[str, float]]):
 
         super().__init__(
             hass,
-            logger=__name__,
+            logger=logging.getLogger(__name__),
             name=DOMAIN,
             update_interval=timedelta(seconds=SCAN_INTERVAL),
         )
