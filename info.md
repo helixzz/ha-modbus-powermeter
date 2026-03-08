@@ -18,4 +18,4 @@ Voltage, current, active/reactive/apparent power, power factor, frequency, and t
 
 Install via HACS (add this repo as a custom integration repository) or copy `custom_components/ddsu666` into your `custom_components` folder and restart Home Assistant.
 
-See the [README](https://github.com/helix/ha-modbus-powermeter) for full setup and configuration.
+See the [README](https://github.com/helixzz/ha-modbus-powermeter) for full setup and configuration.
