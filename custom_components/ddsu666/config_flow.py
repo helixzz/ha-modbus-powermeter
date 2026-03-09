@@ -116,12 +116,12 @@ class Ddsu666OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         super().__init__()
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
         """Manage the options."""
         errors: dict[str, str] = {}
-        data = _entry_data(self.config_entry)
+        data = _entry_data(self._config_entry)
 
         if user_input is not None:
             host = user_input[CONF_HOST].strip()
@@ -137,7 +137,7 @@ class Ddsu666OptionsFlowHandler(config_entries.OptionsFlow):
                 else:
                     unique_id = f"{host}:{port}:{slave}"
                     for entry in self.hass.config_entries.async_entries(DOMAIN):
-                        if entry.entry_id == self.config_entry.entry_id:
+                        if entry.entry_id == self._config_entry.entry_id:
                             continue
                         if entry.unique_id == unique_id:
                             errors["base"] = "already_configured"
